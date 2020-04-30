@@ -8,6 +8,8 @@ public class AggregationStrategyImpl implements AggregationStrategy {
 
   private static AggregationStrategyImpl INSTANCE = new AggregationStrategyImpl();
 
+  private AggregationStrategyImpl() { }
+
   public static AggregationStrategyImpl getInstance() {
     return INSTANCE;
   }
@@ -37,6 +39,7 @@ public class AggregationStrategyImpl implements AggregationStrategy {
   @Override
   public Bar aggregatePair(Bar bar1, Bar bar2) {
     return new BaseBar(
+        bar1.getTimePeriod().plus(bar2.getTimePeriod()),
         bar2.getEndTime(),
         bar1.getOpenPrice(),
         bar1.getMaxPrice().max(bar2.getMaxPrice()),

@@ -14,7 +14,9 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
 
   private Duration aggregationTimeFrame;
   private Duration barsTimePeriod;
+
   private static AggregationStrategy aggregationStrategy = AggregationStrategyImpl.getInstance();
+  private static AggregationUtils aggregationUtils = AggregationUtils.getInstance();
 
   public AggregationTimeSeriesImpl(Duration aggregationTimeFrame) {
     super();
@@ -56,16 +58,27 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
 
   private List<List<Bar>> splitBarList() {
     int barsPerFrame = (int) (this.aggregationTimeFrame.toMillis() / this.barsTimePeriod.toMillis());
-    int framesNumber = super.getBarCount() / barsPerFrame;
     List<List<Bar>> barsSplitPerTimeFrame = new ArrayList<>();
 
     List<Bar> bars = super.getBarData();
 
-    for (int i = 0; i <= framesNumber; i++) {
-      int subListEndIdx = Math.min(barsPerFrame * (i + 1), super.getBarCount());
+    int barIdx = 0;
+    int bucketIdx = 0;
+    while (barIdx < bars.size()) {
 
-      List<Bar> stackedBars = bars.subList(barsPerFrame * i, subListEndIdx);
-      barsSplitPerTimeFrame.add(stackedBars);
+      barsSplitPerTimeFrame.add(new ArrayList<>());
+
+      for (int bucketCounter = 0; bucketCounter < barsPerFrame && barIdx < bars.size(); bucketCounter++) {
+
+        if (bucketCounter != 0 &&
+            !aggregationUtils.isBarsOfSameDayEnd(bars.get(barIdx - 1), bars.get(barIdx))) {
+          break;
+        }
+
+        barsSplitPerTimeFrame.get(bucketIdx).add(bars.get(barIdx));
+        barIdx++;
+      }
+      bucketIdx++;
     }
 
     return barsSplitPerTimeFrame;

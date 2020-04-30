@@ -14,6 +14,10 @@ public class AggregationStrategyImpl implements AggregationStrategy {
 
   @Override
   public Bar aggregateList(List<Bar> bars) {
+    if (bars.isEmpty()) {
+      return null;
+    }
+
     if (bars.size() == 1) {
       return bars.get(0);
     }

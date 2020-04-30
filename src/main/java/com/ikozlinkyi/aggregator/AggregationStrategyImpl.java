@@ -14,6 +14,12 @@ public class AggregationStrategyImpl implements AggregationStrategy {
     return INSTANCE;
   }
 
+  /**
+   * @inheritDoc
+   *
+   * This implementation uses divide and conquer strategy for merging algorithm.
+   * Thus, the time complexity of this algo is log(n)
+   */
   @Override
   public Bar aggregateList(List<Bar> bars) {
     if (bars.isEmpty()) {
@@ -36,6 +42,9 @@ public class AggregationStrategyImpl implements AggregationStrategy {
     );
   }
 
+  /**
+   * @inheritDoc
+   */
   @Override
   public Bar aggregatePair(Bar bar1, Bar bar2) {
     return new BaseBar(

@@ -9,15 +9,25 @@ import java.util.stream.Collectors;
 import org.ta4j.core.Bar;
 import org.ta4j.core.BaseTimeSeries;
 
-
+/**
+ * The class is responsible for handling of time series.
+ * The main purpose of it - to merge low timeframe bars into higher timeframe bars
+ */
 public class AggregationTimeSeriesImpl extends BaseTimeSeries implements AggregationTimeSeries {
 
+  /** higher timeframe for bars to be aggregated into */
   private Duration aggregationTimeFrame;
+
+  /** time period of underlying bars */
   private Duration barsTimePeriod;
 
   private static AggregationStrategy aggregationStrategy = AggregationStrategyImpl.getInstance();
   private static AggregationUtils aggregationUtils = AggregationUtils.getInstance();
 
+  /**
+   *
+   * @param aggregationTimeFrame Timeframe for bars to be merged into
+   */
   public AggregationTimeSeriesImpl(Duration aggregationTimeFrame) {
     super();
     this.aggregationTimeFrame = aggregationTimeFrame;
@@ -42,6 +52,17 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
     return new AggregationTimeSeriesImpl(aggregatedBars);
   }
 
+  /**
+   *
+   * @inheritDoc
+   *
+   * The method ensures that added bar has the same time duration as already added bars
+   * @throws IllegalArgumentException if time period of added bar is greater then current series
+   * aggregationTimeFrame exception is thrown
+   *
+   * @throws IllegalArgumentException if time period of added bar is not the same as for previously
+   * added bars
+   */
   @Override
   public void addBar(Bar bar, boolean replace) {
     int barCount = super.getBarCount();
@@ -56,6 +77,12 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
     super.addBar(bar, replace);
   }
 
+  /**
+   * Creates a shallow copy of bar data, packs bars into "buckets". Splits bars with
+   * different date endTime into separate buckets, even if previous bucket is not full
+   *
+   * @return List of bar Lists
+   */
   private List<List<Bar>> splitBarList() {
     int barsPerFrame = (int) (this.aggregationTimeFrame.toMillis() / this.barsTimePeriod.toMillis());
     List<List<Bar>> barsSplitPerTimeFrame = new ArrayList<>();

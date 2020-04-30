@@ -71,6 +71,7 @@ public class Main {
     Arrays.stream(bars).forEach(bar -> timeSeries.addBar(bar, false));
 
     AggregationTimeSeries aggregatedSeries =  timeSeries.aggregate();
+    System.out.println(aggregatedSeries.getBarData());
   }
 
 }

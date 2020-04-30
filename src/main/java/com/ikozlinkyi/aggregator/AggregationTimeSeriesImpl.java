@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.ta4j.core.Bar;
-import org.ta4j.core.BaseBar;
 import org.ta4j.core.BaseTimeSeries;
 
 
 public class AggregationTimeSeriesImpl extends BaseTimeSeries implements AggregationTimeSeries {
+
   private Duration aggregationTimeFrame;
   private Duration barsTimePeriod;
-
+  private static AggregationStrategy aggregationStrategy = AggregationStrategyImpl.getInstance();
 
   public AggregationTimeSeriesImpl(Duration aggregationTimeFrame) {
     super();
@@ -24,44 +24,19 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
     super(bars);
   }
 
+  public Duration getBarsTimePeriod() {
+    return this.barsTimePeriod;
+  }
+
   @Override
   public AggregationTimeSeries aggregate() {
     List<List<Bar>> barsSplitPerTimeFrame = splitBarList();
     List<Bar> aggregatedBars = barsSplitPerTimeFrame
         .stream()
-        .map(this::mergeBarsList)
+        .map(aggregationStrategy::aggregateList)
         .collect(Collectors.toList());
 
     return new AggregationTimeSeriesImpl(aggregatedBars);
-  }
-
-  private Bar mergeBarsList(List<Bar> bars) {
-    if (bars.size() == 1) {
-      return bars.get(0);
-    }
-
-    if (bars.size() == 2) {
-      return mergeBars(bars.get(0), bars.get(1));
-    }
-
-    int middleIndex = bars.size() / 2;
-    return mergeBars(
-        mergeBarsList(bars.subList(0, middleIndex)),
-        mergeBarsList(bars.subList(middleIndex, bars.size())
-        )
-    );
-  }
-
-  private Bar mergeBars(Bar bar1, Bar bar2) {
-    return new BaseBar(
-        bar2.getEndTime(),
-        bar1.getOpenPrice(),
-        bar1.getMaxPrice().max(bar2.getMaxPrice()),
-        bar1.getMinPrice().min(bar2.getMinPrice()),
-        bar2.getClosePrice(),
-        bar1.getVolume().plus(bar2.getVolume()),
-        bar1.getAmount().plus(bar2.getAmount())
-    );
   }
 
   @Override
@@ -79,8 +54,8 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
   }
 
   private List<List<Bar>> splitBarList() {
-    int barsPerFrame = getBarsNumberPerFrame();
-    int framesNumber = getFramesNumber();
+    int barsPerFrame = (int) (this.aggregationTimeFrame.toMillis() / this.barsTimePeriod.toMillis());
+    int framesNumber = super.getBarCount() / barsPerFrame;
     List<List<Bar>> barsSplitPerTimeFrame = new ArrayList<>();
 
     List<Bar> bars = super.getBarData();
@@ -93,18 +68,6 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
     }
 
     return barsSplitPerTimeFrame;
-  }
-
-  private int getBarsNumberPerFrame() {
-    return (int) (this.aggregationTimeFrame.toMillis() / this.barsTimePeriod.toMillis());
-  }
-
-  private int getFramesNumber() {
-    return super.getBarCount() / getBarsNumberPerFrame();
-  }
-
-  public Duration getBarsTimePeriod() {
-    return this.barsTimePeriod;
   }
 
   private void setBarsTimePeriod(Bar newBar) {

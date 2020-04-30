@@ -15,8 +15,8 @@ import org.ta4j.core.num.PrecisionNum;
 
 class AggregationStrategyImplTest {
 
-  private static Function<Number, Num> defaultFunction = PrecisionNum::valueOf;
-  private static AggregationStrategy aggregationStrategy = AggregationStrategyImpl.getInstance();
+  private Function<Number, Num> defaultFunction = PrecisionNum::valueOf;
+  private AggregationStrategy aggregationStrategy = AggregationStrategyImpl.getInstance();
 
   @Test
   void shouldReturnInstance() {

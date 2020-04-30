@@ -1,7 +1,8 @@
 package com.ikozlinkyi.aggregator;
 
+import static com.ikozlinkyi.aggregator.constants.ErrorMessages.*;
+
 import java.time.Duration;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,10 +44,10 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
   public void addBar(Bar bar, boolean replace) {
     int barCount = super.getBarCount();
 
-    if ((barCount == 1 && !replace) ||
-        (barCount == 2 && replace)) {
+    if ((barCount == 0) ||
+        (barCount == 1 && replace)) {
       setBarsTimePeriod(bar);
-    } else if (barCount != 0){
+    } else {
       checkNewBarTimePeriod(bar);
     }
 
@@ -71,13 +72,10 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
   }
 
   private void setBarsTimePeriod(Bar newBar) {
-    ZonedDateTime bar0EndTime = super.getBar(0).getEndTime();
-    ZonedDateTime bar1EndTime = newBar.getEndTime();
-
-    Duration timePeriod = Duration.between(bar0EndTime, bar1EndTime);
+    Duration timePeriod = newBar.getTimePeriod();
 
     if (timePeriod.compareTo(this.aggregationTimeFrame) > 0) {
-      throw new IllegalArgumentException("Time period for bars cannot be greater than aggregation time frame");
+      throw new IllegalArgumentException(TIME_PERIOD_GREATER_THAN_TIME_FRAME);
     }
 
     this.barsTimePeriod = timePeriod;
@@ -85,7 +83,7 @@ public class AggregationTimeSeriesImpl extends BaseTimeSeries implements Aggrega
 
   private void checkNewBarTimePeriod(Bar bar) {
     if (!bar.getTimePeriod().equals(barsTimePeriod)) {
-      throw new IllegalArgumentException("Bars should have same end time difference");
+      throw new IllegalArgumentException(INCONSISTENT_BARS_TIMEFRAME);
     }
   }
 }

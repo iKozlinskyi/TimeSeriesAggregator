@@ -1,12 +1,7 @@
 # Time Series Aggregator
 
-The purpose of this README is to provide more information for the way this task was done. <br/>
-As I understood, the main task was to aggregate time series of bars with a shorter timeframe (e. g. 1 min) 
-into a series of bars with a higher timeframe (e. g. 5 min). <br>
-For any questions, please contact the author directly:
-- Email: ihor.kozlinskyi.dev@gmail.com
-- Skype: live:.cid.1e5f262a47dcc989
-- tel: 0994018433
+This project is an extension to  [ta4j](https://github.com/ta4j/ta4j) library - it allows aggregation of low timeframes
+into higher timeframes.
 
 ## How to aggregate time series
 1. Create an instance of AggregationTimeSeriesImpl, pass desired higher timeframe to the constructor.
